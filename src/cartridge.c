@@ -253,8 +253,6 @@ const char *get_rom_type() {
 }
 
 const char *get_rom_code() {
-    //printf("*********OLD LIC CODE: %02X\n", cart.header->old_licensee_code);
-    //printf("*********NEW LIC CODE: %02X %02X\n", cart.header->new_lincensee_code[0], cart.header->new_lincensee_code[1]);
     if (cart.header->old_licensee_code == 0x33) {
         return new_lic_code[cart.header->new_lincensee_code[1]];
     } else {
@@ -279,6 +277,7 @@ bool load_rom(char *rom_path) {
     cart.rom_size = ftell(file);
     rewind(file);
 
+    // ask for space so then i can store the cartridge data
     cart.data = malloc(cart.rom_size);
     fread(cart.data, cart.rom_size, 1, file);
 
@@ -308,7 +307,7 @@ bool load_rom(char *rom_path) {
         cart.header->title[12] = 0;
         cart.header->title[13] = 0;
         cart.header->title[14] = 0;
-        cart.header->title[15] = 0;
+        //cart.header->title[15] = 0;
     } // otherwise is a dmg game and the title is 15 bytes
 
     // get the actual RAM size
@@ -323,12 +322,20 @@ bool load_rom(char *rom_path) {
         default: ram_size = 0;
     }
 
+    u16 lic_code;
+    if (cart.header->old_licensee_code == 0x33) {
+        lic_code = cart.header->new_lincensee_code[1];
+    } else {
+        lic_code = cart.header->old_licensee_code;
+    }
+
     printf("FILEPATH      : %s\n", cart.filename);
     printf("TITLE         : %s\n", cart.header->title);
-    printf("LICENSEE CODE : %s\n", get_rom_code());
+    printf("LICENSEE CODE : %02X (%s)\n", lic_code, get_rom_code());
     printf("ROM SIZE      : %dKB\n", rom_size  / 1024);
     printf("RAM SIZE      : %dKB\n", ram_size / 1024);
     printf("CGB FLAG      : %02X\n", (unsigned char)cart.header->title[15]);
+    printf("CART TYPE     : %s\n", cart_type[cart.header->cartridge_type]);
     printf("CHECKSUM      : %s\n", checksum_passed ? "PASSED" : "DIDN'T PASSED");
 
     if (!checksum_passed) return false;
