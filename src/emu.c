@@ -4,7 +4,7 @@
 //Cpu cpu;
 
 void emu_run(Emu *emu, int argc, char* argv[]) {
-    load_rom(&emu->cart, argv[1]);
+    load_rom(&emu->cartridge, argv[1]);
 
     //set_AF(&cpu, 0x1224);
     //debug_cpu(cpu);

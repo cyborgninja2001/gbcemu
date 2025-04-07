@@ -9,7 +9,7 @@
 
 typedef struct {
     GBC gbc;
-    Cartridge cart;
+    Cartridge cartridge;
     bool paused;
     bool running;
     u64 ticks;
