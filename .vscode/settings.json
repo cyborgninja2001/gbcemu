@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "cartridge.h": "c",
+        "common.h": "c"
+    }
+}
