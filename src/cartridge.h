@@ -18,22 +18,22 @@ typedef struct {
     u8 mask_rom_version_number; // 0x014C
     u8 header_checksum;         // 0x014D
     u8 global_checksum;         // 0x014E - 0x014F
-} cartridge_header;
+} Cartridge_header;
 
 typedef struct {
     char *filename;
     u32 rom_size;
     u8 *data;
-    cartridge_header *header;
-} cartridge;
+    Cartridge_header *header;
+} Cartridge;
 
 // returns the cartridge type
-const char *get_rom_type();
+const char *get_rom_type(Cartridge cart);
 
 // returns the ROM code (new or old lic code)
-const char *get_rom_code();
+const char *get_rom_code(Cartridge cart);
 
 // loads the ROM. Returns true if success otherwise false
-bool load_rom(char *rom_path);
+bool load_rom(Cartridge *cart, char *rom_path);
 
 #endif

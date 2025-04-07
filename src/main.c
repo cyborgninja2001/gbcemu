@@ -1,8 +1,6 @@
-#include "common.h"
-#include "cartridge.h"
-#include "cpu.h"
+#include "emu.h"
 
-int main(int argc, char** argv) {
-    load_rom(argv[1]);
+int main(int argc, char* argv[]) {
+    emu_run(argc, argv);
     return 0;
 }

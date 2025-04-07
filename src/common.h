@@ -15,7 +15,7 @@ typedef uint64_t u64;
 #define BIT(a,n) (a & (1 << n))
 
 // set the 'n' bit of 'a' with value 'v'
-#define BIT_SET(a, n, v) (v ? a = a | (1 << n) : a = a & ~(1 << n))
+#define BIT_SET(a, n, v) { if (v) a |= (1 << n); else a &= ~(1 << n);}
 
 // macro for things not yet implemented
 #define NO_IMPLEMENTED {printf("NOT IMPLEMENTED!\n"); exit(1);}

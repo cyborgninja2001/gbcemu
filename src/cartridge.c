@@ -1,6 +1,6 @@
 #include "cartridge.h"
 
-static cartridge cart;
+//static cartridge cart;
 
 // array of strings with the name of all the new licensee code names (using Designated Initializers)
 char *new_lic_code[] = {
@@ -248,11 +248,11 @@ char *old_lic_code[] = {
     [0xFF] = "LJN",
 };
 
-const char *get_rom_type() {
+const char *get_rom_type(Cartridge cart) {
     return cart_type[cart.header->cartridge_type];
 }
 
-const char *get_rom_code() {
+const char *get_rom_code(Cartridge cart) {
     if (cart.header->old_licensee_code == 0x33) {
         return new_lic_code[cart.header->new_lincensee_code[1]];
     } else {
@@ -260,8 +260,8 @@ const char *get_rom_code() {
     }
 }
 
-bool load_rom(char *rom_path) {
-    cart.filename = rom_path;
+bool load_rom(Cartridge *cart, char *rom_path) {
+    cart->filename = rom_path;
 
     FILE *file = fopen(rom_path, "r");
 
@@ -274,45 +274,45 @@ bool load_rom(char *rom_path) {
 
     // get the file size
     fseek(file, 0, SEEK_END);
-    cart.rom_size = ftell(file);
+    cart->rom_size = ftell(file);
     rewind(file);
 
     // ask for space so then i can store the cartridge data
-    cart.data = malloc(cart.rom_size);
-    fread(cart.data, cart.rom_size, 1, file);
+    cart->data = malloc(cart->rom_size);
+    fread(cart->data, cart->rom_size, 1, file);
 
     fclose(file);
 
-    cart.header = (cartridge_header *)(cart.data + 0x100);
+    cart->header = (Cartridge_header *)(cart->data + 0x100);
 
     // checksum:
     u8 checksum = 0;
     for (uint16_t address = 0x0134; address <= 0x014C; address++) {
-        checksum = checksum - cart.data[address] - 1;
+        checksum = checksum - cart->data[address] - 1;
     }
 
     bool checksum_passed;
-    if (checksum == cart.data[0x014D]) {
+    if (checksum == cart->data[0x014D]) {
         checksum_passed = true;
     } else {
         checksum_passed = false;
     }
 
     // get the rom size in KB
-    u32 rom_size = 32768 * (1 << cart.header->rom_size);
+    u32 rom_size = 32768 * (1 << cart->header->rom_size);
 
-    if ((unsigned char)cart.header->title[15] != 0x00) {
+    if ((unsigned char)cart->header->title[15] != 0x00) {
         // if it's a gameboy color game (the title is only 11 bytes)
-        cart.header->title[11] = 0;
-        cart.header->title[12] = 0;
-        cart.header->title[13] = 0;
-        cart.header->title[14] = 0;
+        cart->header->title[11] = 0;
+        cart->header->title[12] = 0;
+        cart->header->title[13] = 0;
+        cart->header->title[14] = 0;
         //cart.header->title[15] = 0;
     } // otherwise is a dmg game and the title is 15 bytes
 
     // get the actual RAM size
     u32 ram_size;
-    switch(cart.header->ram_size) {
+    switch(cart->header->ram_size) {
         case 0x00: ram_size = 0; break;
         case 0x01: ram_size = 0; break;
         case 0x02: ram_size = 1024 * 8; break;
@@ -323,19 +323,19 @@ bool load_rom(char *rom_path) {
     }
 
     u16 lic_code;
-    if (cart.header->old_licensee_code == 0x33) {
-        lic_code = cart.header->new_lincensee_code[1];
+    if (cart->header->old_licensee_code == 0x33) {
+        lic_code = cart->header->new_lincensee_code[1];
     } else {
-        lic_code = cart.header->old_licensee_code;
+        lic_code = cart->header->old_licensee_code;
     }
 
-    printf("FILEPATH      : %s\n", cart.filename);
-    printf("TITLE         : %s\n", cart.header->title);
-    printf("LICENSEE CODE : %02X (%s)\n", lic_code, get_rom_code());
+    printf("FILEPATH      : %s\n", cart->filename);
+    printf("TITLE         : %s\n", cart->header->title);
+    printf("LICENSEE CODE : %02X (%s)\n", lic_code, get_rom_code(*cart));
     printf("ROM SIZE      : %dKB\n", rom_size  / 1024);
     printf("RAM SIZE      : %dKB\n", ram_size / 1024);
-    printf("CGB FLAG      : %02X\n", (unsigned char)cart.header->title[15]);
-    printf("CART TYPE     : %s\n", cart_type[cart.header->cartridge_type]);
+    printf("CGB FLAG      : %02X\n", (unsigned char)cart->header->title[15]);
+    printf("CART TYPE     : %s\n", cart_type[cart->header->cartridge_type]);
     printf("CHECKSUM      : %s\n", checksum_passed ? "PASSED" : "DIDN'T PASSED");
 
     if (!checksum_passed) return false;

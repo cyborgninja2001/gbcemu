@@ -4,6 +4,7 @@
 // 8-bit 8080-like Sharp CPU (speculated to be a SM83 core)
 
 #include "common.h"
+#include <stdbool.h>
 
 typedef struct {
     u8 a;
@@ -20,10 +21,30 @@ typedef struct {
 
 typedef struct {
     Registers registers;
+    u8 current_opcode;
 } Cpu;
 
-void cpu_init();
-void cpu_fetch();
-void cpu_decode_and_execute();
+// UTILS:
+u16 get_AF(Cpu cpu);
+u16 get_BC(Cpu cpu);
+u16 get_DE(Cpu cpu);
+u16 get_HL(Cpu cpu);
+
+void set_AF(Cpu *cpu, u16 value);
+void set_BC(Cpu *cpu, u16 value);
+void set_DE(Cpu *cpu, u16 value);
+void set_HL(Cpu *cpu, u16 value);
+
+void set_flag_Z(Cpu *cpu, bool value);
+void set_flag_N(Cpu *cpu, bool value);
+void set_flag_H(Cpu *cpu, bool value);
+void set_flag_C(Cpu *cpu, bool value);
+
+void debug_cpu();
+
+// Main functions:
+void cpu_init(Cpu *cpu);
+void cpu_fetch(Cpu *cpu);
+void cpu_decode_and_execute(Cpu *cpu);
 
 #endif
