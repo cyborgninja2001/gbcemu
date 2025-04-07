@@ -1,6 +1,6 @@
 #include "memory.h"
 
-static Memory memory;
+u8 memory_init(Memory *memory) {}
 
 u8 memory_read(Memory mem, u16 address) {}
 

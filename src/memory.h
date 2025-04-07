@@ -17,6 +17,8 @@ typedef struct {
     u8 interrupt_enable_register; // 0xFFFF
 } Memory;
 
+u8 memory_init(Memory *memory);
+
 u8 memory_read(Memory mem, u16 address);
 void memory_write(Memory *mem, u16 address, u8 value);
 

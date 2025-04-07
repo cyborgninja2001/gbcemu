@@ -7,6 +7,18 @@
 #include "memory.h"
 #include "gbc.h"
 
-void emu_run(int argc, char* argv[]);
+typedef struct {
+    GBC gbc;
+    Cartridge cart;
+    bool paused;
+    bool running;
+    u64 ticks;
+} Emu;
+
+// execute the emulator
+void emu_run(Emu *emu, int argc, char* argv[]);
+
+// emulate the cycles
+void emu_cycles(Emu *emu, int cycles);
 
 #endif
