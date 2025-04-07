@@ -16,11 +16,11 @@ typedef struct {
     u8 l;
     u16 sp;
     u16 pc;
-} registers;
+} Registers;
 
 typedef struct {
-    registers regs;
-} gbc_cpu;
+    Registers registers;
+} Cpu;
 
 void cpu_init();
 void cpu_fetch();
