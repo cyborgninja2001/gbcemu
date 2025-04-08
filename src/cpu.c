@@ -1,11 +1,5 @@
 #include "cpu.h"
 
-// macros to get the flags
-#define CPU_FLAG_Z BIT(cpu.registers.f, 7) // zero flag
-#define CPU_FLAG_N BIT(cpu.registers.f, 6) // subtraction flag (BCD)
-#define CPU_FLAG_H BIT(cpu.registers.f, 5) // half Carry flag (BCD)
-#define CPU_FLAG_C BIT(cpu.registers.f, 4) // carry flag
-
 // **** UTILS: ****
 u16 get_AF(Cpu cpu) {
     return ((u16)cpu.registers.a << 8) | cpu.registers.f;
@@ -43,6 +37,22 @@ void set_HL(Cpu *cpu, u16 value) {
     cpu->registers.l = value & 0xFF;
 }
 
+u8 get_flag_Z(Cpu cpu) {
+    return ((cpu.registers.f >> 7) & 1);
+}
+
+u8 get_flag_N(Cpu cpu) {
+    return ((cpu.registers.f >> 6) & 1);
+}
+
+u8 get_flag_H(Cpu cpu) {
+    return ((cpu.registers.f >> 5) & 1);
+}
+
+u8 get_flag_C(Cpu cpu) {
+    return ((cpu.registers.f >> 4) & 1);
+}
+
 void set_flag_Z(Cpu *cpu, bool value) {
     BIT_SET(cpu->registers.f, 7, value);
 }
@@ -77,11 +87,70 @@ void debug_cpu(Cpu cpu) {
     printf("PC:0x%04X SP:0x%04X\n",
         cpu.registers.pc,
         cpu.registers.sp);
+    printf("FLAGS: Z:%u N:%u H:%u C:%u\n", get_flag_Z(cpu), get_flag_N(cpu), get_flag_H(cpu), get_flag_C(cpu));
     //printf("\n");
 }
 
 // **** MAIN FUNCTIONS: ****
-void cpu_init(Cpu *cpu) {}
+void cpu_init(Cpu *cpu, Cartridge cartridge) {
+    // check if the cartridge supports cgb mode or dmg mode
+    unsigned char cgb_flag = (unsigned char)cartridge.header->title[15];
+    if (cgb_flag != 0x00) {
+        cpu->cgb_mode = true;  // CGB
+    } else {
+        cpu->cgb_mode = false; // DMG
+    }
+
+    // init the current opcode (*CHECK!*)
+    cpu->current_opcode = 0x00;
+
+    if (cpu->cgb_mode) {
+        // CGB Mode
+        cpu->registers.a = 0x11;
+        cpu->registers.f = 0x00;
+        set_flag_Z(cpu, 1);
+        cpu->registers.b = 0x00;
+        cpu->registers.c = 0x00;
+        cpu->registers.d = 0xFF;
+        cpu->registers.e = 0x56;
+        cpu->registers.h = 0x00;
+        cpu->registers.l = 0x0D;
+    } else {
+        // CGB (DMG Mode)
+        cpu->registers.a = 0x11;
+        cpu->registers.f = 0x00;
+        set_flag_Z(cpu, 1);
+
+        if ((cartridge.header->old_licensee_code == 0x01) ||
+            ((cartridge.header->old_licensee_code == 0x33) &&
+            (cartridge.header->new_lincensee_code[1] == 0x30 ||
+             cartridge.header->new_lincensee_code[1] == 0x31))) {
+                // B is the sum of all 16 title bytes
+                //  *DANGER*: in cartridge I rewrote the last characters of the title
+                // -> that's why i read from data instead from cartridge.header.title
+                u8 result = 0;
+                for (int i = 0x0134; i <= 0x0143; i++) {
+                    result += cartridge.data[i];
+                }
+                cpu->registers.b = result;
+            } else {
+                cpu->registers.b = 0x00;
+            }
+
+        cpu->registers.c = 0x00;
+        cpu->registers.d = 0x00;
+        cpu->registers.e = 0x08;
+
+        if ((cpu->registers.b == 0x43) || (cpu->registers.b == 0x58)) {
+            set_HL(cpu, 0x991A);
+        } else {
+            set_HL(cpu, 0x007C);
+        }
+    }
+
+    cpu->registers.sp = 0xFFFE;
+    cpu->registers.pc = 0x0100;
+}
 
 void cpu_fetch(Cpu *cpu) {}
 

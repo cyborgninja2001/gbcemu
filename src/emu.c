@@ -6,8 +6,9 @@
 void emu_run(Emu *emu, int argc, char* argv[]) {
     load_rom(&emu->cartridge, argv[1]);
 
+    cpu_init(&emu->gbc.cpu, emu->cartridge);
     //set_AF(&cpu, 0x1224);
-    //debug_cpu(cpu);
+    debug_cpu(emu->gbc.cpu);
 
     emu->ticks++;
 }
