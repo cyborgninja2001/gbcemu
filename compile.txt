@@ -1,1 +1,1 @@
-gcc src/main.c src/cartridge.c src/cpu.c src/emu.c -o main -lSDL2 -lSDL2_ttf
+gcc src/main.c src/cartridge.c src/cpu.c src/emu.c src/memory.c -o main -lSDL2 -lSDL2_ttf

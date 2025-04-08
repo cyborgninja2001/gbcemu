@@ -92,7 +92,7 @@ void debug_cpu(Cpu cpu) {
 }
 
 // INSTRUCTIONS:
-void nop() {
+void NOP() {
     // it does nothing
 }
 
