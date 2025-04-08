@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "cartridge.h"
+#include "memory.h"
 #include <stdbool.h>
 
 typedef struct {
@@ -25,6 +26,23 @@ typedef struct {
     bool cgb_mode;
     u8 current_opcode;
 } Cpu;
+
+typedef enum {
+    A,
+    F,
+    B,
+    C,
+    D,
+    E,
+    H,
+    L,
+    AF,
+    BC,
+    DE,
+    HL,
+    SP,
+    PC,
+} Register_type;
 
 // UTILS:
 u16 get_AF(Cpu cpu);
@@ -49,9 +67,18 @@ void set_flag_C(Cpu *cpu, bool value);
 
 void debug_cpu(Cpu cpu);
 
+// ****INSTRUCTIONS****
+void NOP();
+
+// LD
+void LD_R_R(Cpu *cpu, Register_type r1, Register_type r2);  // LD r1, r2
+void LD_R_n8(Cpu *cpu, Register_type r1);                   // LD r1, n8
+void LD_R_n16(Cpu *cpu, Register_type r1);                  // LD r1, n16
+void LD_MR_R(Cpu *cpu, Register_type r1, Register_type r2); // LD [r1], r2
+
 // Main functions:
 void cpu_init(Cpu *cpu, Cartridge cartridge);
-void cpu_fetch(Cpu *cpu);
-void cpu_decode_and_execute(Cpu *cpu);
+void cpu_fetch(Cpu *cpu, Memory memory);
+void cpu_decode_and_execute(Cpu *cpu, Memory memory);
 
 #endif

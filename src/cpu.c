@@ -91,6 +91,11 @@ void debug_cpu(Cpu cpu) {
     //printf("\n");
 }
 
+// INSTRUCTIONS:
+void nop() {
+    // it does nothing
+}
+
 // **** MAIN FUNCTIONS: ****
 void cpu_init(Cpu *cpu, Cartridge cartridge) {
     // check if the cartridge supports cgb mode or dmg mode
@@ -152,6 +157,16 @@ void cpu_init(Cpu *cpu, Cartridge cartridge) {
     cpu->registers.pc = 0x0100;
 }
 
-void cpu_fetch(Cpu *cpu) {}
+void cpu_fetch(Cpu *cpu, Memory memory) {
+    cpu->current_opcode = memory_read(memory, cpu->registers.pc);
+    cpu->registers.pc += 1;
+}
 
-void cpu_decode_and_execute(Cpu *cpu) {}
+void cpu_decode_and_execute(Cpu *cpu, Memory memory) {
+    switch(cpu->current_opcode) {
+        case 0x00: NOP(); break; // NOP
+        case 0x01: break; // LD BC, n16
+        default:
+            printf("*OPCODE NOT RECOGNIZED!*: %02X\n", cpu->current_opcode);
+    }
+}
